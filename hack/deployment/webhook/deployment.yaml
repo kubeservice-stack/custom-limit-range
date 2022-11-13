@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customlimitrange-webhook
+  namespace: kube-system
+  labels:
+    app: customlimitrange-webhook
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: customlimitrange-webhook
+  template:
+    metadata:
+      labels:
+        app: customlimitrange-webhook
+    spec:
+      serviceAccountName: customlimitrange-webhook
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: webhook-server
+        image: dongjiang1989/customlimitrange-manager
+        ports:
+        - containerPort: 9443
+          name: webhook
+          protocol: TCP
+        - containerPort: 8080
+          name: metrics
+          protocol: TCP
+        - containerPort: 8081
+          name: probe
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 10m
+            memory: 64Mi
+        volumeMounts:
+          - mountPath: /etc/webhook/certs/
+            name: cert
+            readOnly: true
+      volumes:
+      - name: cert
+        secret:
+          defaultMode: 420
+          secretName: webhook-server-cert

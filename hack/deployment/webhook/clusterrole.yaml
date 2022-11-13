@@ -1,0 +1,14 @@
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: customlimitrange-webhook
+rules:
+- apiGroups: ["admissionregistration.k8s.io"]
+  resources: ["mutatingwebhookconfigurations", "validatingwebhookconfigurations"]
+  verbs: ["get", "create", "update"]
+- apiGroups: ["custom.cmss.com"]
+  resources: ["customlimitranges"]
+  verbs: ["*"]
+- apiGroups: ["custom.cmss.com"]
+  resources: ["customlimitranges/status"]
+  verbs: ["get"]

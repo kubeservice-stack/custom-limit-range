@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: limitrange-big
+  namespace: test-a
+  annotations:
+    kubernetes.io/egress-bandwidth: 10G
+    kubernetes.io/ingress-bandwidth: 10G
+spec:
+  containers:
+  - image: nginx
+    name: nginx-test
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+

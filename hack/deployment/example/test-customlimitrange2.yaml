@@ -1,0 +1,17 @@
+apiVersion: custom.cmss.com/v1
+kind: CustomLimitRange
+metadata:
+  name: test-rangelimit2s
+  namespace: test-a
+spec:
+  limitrange:
+    type: Pod
+    max:
+      ingress-bandwidth: "10G"
+      egress-bandwidth: 10G
+    min:
+      ingress-bandwidth: 100M
+      egress-bandwidth: "100M"
+    default:
+      ingress-bandwidth: "500M"
+      egress-bandwidth: 477000k

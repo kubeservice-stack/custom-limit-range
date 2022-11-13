@@ -1,0 +1,14 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: customlimitrange-webhook
+  namespace: kube-system
+subjects:
+- kind: ServiceAccount
+  name: customlimitrange-webhook
+  namespace: kube-system
+  apiGroup: ""
+roleRef:
+  kind: Role
+  name: customlimitrange-webhook
+  apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,58 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: validating-webhook-configuration
+  namespace: kube-system
+  labels:
+    app: validating-webhook-configuration
+  annotations:
+    cert-manager.io/inject-ca-from: kube-system/webhook-server-cert
+webhooks:
+  - name: validating-webhook-configuration.kube-system.svc
+    admissionReviewVersions: ["v1","v1beta1"]
+    clientConfig:
+      # 集群获取caBundle方式: kubectl config view --raw -o json | jq -r '.clusters[0].cluster."certificate-authority-data"' | tr -d '"'
+      #caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUMvakNDQWVhZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFWTVJNd0VRWURWUVFERXdwcmRXSmwKY201bGRHVnpNQjRYRFRJeU1EVXdOREV4TXpnek5Wb1hEVE15TURVd01URXhNemd6TlZvd0ZURVRNQkVHQTFVRQpBeE1LYTNWaVpYSnVaWFJsY3pDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBTmdyCitZaTE3Y0E5N0lscU1UWGp1K0xnWWV3eWVYbWJ5RGxUMnZLL1FYazV0cFpXanlUbnJCUm9iWE1MbVBBdjJGekEKMlBkcnpYdU5VTk1zbDNmeGUwbk9sMGJnZ1hoRmZzMVJ5bmRwUURvTitrSnhCekxZMU1PQXlGakZoU0tMVzIyVwp3WnViYlhqWDB1THhSN1pldUNpbUtqSGhmNkx4UXc0QkUvdkMycG41Q3RjV2ttR3F2OE1SYXhOVSswUGUyNTdkCmp4Y0dmSXducnlWbG1XOHRqUElrZlVuaEZpMldFellyNy9EbzM5ajZZTERUN0VEaDdNUWJLU0pRWlg3Zk1jRkkKREloZkxTV1pobXBpVEpMOG85QThybDQ5ekxEYWJGT0hzcloyUEg1T3RJM2MzN0pTWERZUWx2bEpId3lYUVNsbQpHZmpvSHNPU1QrcnNLNjFBMHJVQ0F3RUFBYU5aTUZjd0RnWURWUjBQQVFIL0JBUURBZ0trTUE4R0ExVWRFd0VCCi93UUZNQU1CQWY4d0hRWURWUjBPQkJZRUZJZ0ZSa2ZnN0Jsd29wdWw0NDNSTmtVVkFTZEZNQlVHQTFVZEVRUU8KTUF5Q0NtdDFZbVZ5Ym1WMFpYTXdEUVlKS29aSWh2Y05BUUVMQlFBRGdnRUJBQStidzVtcjNNV0ViZXF1SXBvSwprV1hWS3paTWYyTGhhOTJkL01uQUhkanNEczFwazFFQWhoeWM1NjVKMWp6WHZ0N1hPT1VHbERveHVRa3BjcmIyCkJvejFLV2lvVjBHVjFac1lFNlJ1KzRXTHZSWHNwVDB3aGhEbElRY2RlSVlXM0lsVjZXajRSeVovQ244MXYyYWwKVU1lM2VuYmY3aW80WlpRZHlZdVNDTXNuRnZBdmZxRmtmMUtmMTZSeWdFZTVRM1lpSUNKbGRQQkM0UVk1LzdWdApkdW1VUjNTb3FMaGhaNGhaR3NtYkFtUWtLTVc0SldxTFRZYnJzVjhHOFEyWm9GTUdyWWxwQ0FFNU9OdC9XNHFSClZsZzVLd3VsZTFudGRQdXJQdGhOU0pObDNNOUhHNUU1OVFMWE1rcE1xR1AxZDlDZ1g4akF6Q0t2eVh1ZERBUE4KL0ZnPQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+      service:
+        name: customlimitrange-webhook-service
+        namespace: kube-system
+        path: /validate-custom-cmss-com-v1-customlimitrange
+        port: 443
+    rules:
+      - operations: ["CREATE", "UPDATE"]
+        apiGroups: ["custom.cmss.com"]
+        apiVersions: ["v1"]
+        resources: ["customlimitranges", "customlimitranges/*"]
+    sideEffects: None
+    timeoutSeconds: 15
+    failurePolicy: Fail
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: mutating-webhook-configuration
+  namespace: kube-system
+  labels:
+    app: mutating-webhook-configuration
+  annotations:
+    cert-manager.io/inject-ca-from: kube-system/webhook-server-cert
+webhooks:
+  - name: mutating-webhook-configuration.kube-system.svc
+    admissionReviewVersions: ["v1","v1beta1"]
+    clientConfig:
+      # 集群获取caBundle方式: kubectl config view --raw -o json | jq -r '.clusters[0].cluster."certificate-authority-data"' | tr -d '"'
+      #caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUMvakNDQWVhZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFWTVJNd0VRWURWUVFERXdwcmRXSmwKY201bGRHVnpNQjRYRFRJeU1EVXdOREV4TXpnek5Wb1hEVE15TURVd01URXhNemd6TlZvd0ZURVRNQkVHQTFVRQpBeE1LYTNWaVpYSnVaWFJsY3pDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBTmdyCitZaTE3Y0E5N0lscU1UWGp1K0xnWWV3eWVYbWJ5RGxUMnZLL1FYazV0cFpXanlUbnJCUm9iWE1MbVBBdjJGekEKMlBkcnpYdU5VTk1zbDNmeGUwbk9sMGJnZ1hoRmZzMVJ5bmRwUURvTitrSnhCekxZMU1PQXlGakZoU0tMVzIyVwp3WnViYlhqWDB1THhSN1pldUNpbUtqSGhmNkx4UXc0QkUvdkMycG41Q3RjV2ttR3F2OE1SYXhOVSswUGUyNTdkCmp4Y0dmSXducnlWbG1XOHRqUElrZlVuaEZpMldFellyNy9EbzM5ajZZTERUN0VEaDdNUWJLU0pRWlg3Zk1jRkkKREloZkxTV1pobXBpVEpMOG85QThybDQ5ekxEYWJGT0hzcloyUEg1T3RJM2MzN0pTWERZUWx2bEpId3lYUVNsbQpHZmpvSHNPU1QrcnNLNjFBMHJVQ0F3RUFBYU5aTUZjd0RnWURWUjBQQVFIL0JBUURBZ0trTUE4R0ExVWRFd0VCCi93UUZNQU1CQWY4d0hRWURWUjBPQkJZRUZJZ0ZSa2ZnN0Jsd29wdWw0NDNSTmtVVkFTZEZNQlVHQTFVZEVRUU8KTUF5Q0NtdDFZbVZ5Ym1WMFpYTXdEUVlKS29aSWh2Y05BUUVMQlFBRGdnRUJBQStidzVtcjNNV0ViZXF1SXBvSwprV1hWS3paTWYyTGhhOTJkL01uQUhkanNEczFwazFFQWhoeWM1NjVKMWp6WHZ0N1hPT1VHbERveHVRa3BjcmIyCkJvejFLV2lvVjBHVjFac1lFNlJ1KzRXTHZSWHNwVDB3aGhEbElRY2RlSVlXM0lsVjZXajRSeVovQ244MXYyYWwKVU1lM2VuYmY3aW80WlpRZHlZdVNDTXNuRnZBdmZxRmtmMUtmMTZSeWdFZTVRM1lpSUNKbGRQQkM0UVk1LzdWdApkdW1VUjNTb3FMaGhaNGhaR3NtYkFtUWtLTVc0SldxTFRZYnJzVjhHOFEyWm9GTUdyWWxwQ0FFNU9OdC9XNHFSClZsZzVLd3VsZTFudGRQdXJQdGhOU0pObDNNOUhHNUU1OVFMWE1rcE1xR1AxZDlDZ1g4akF6Q0t2eVh1ZERBUE4KL0ZnPQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+      service:
+        name: customlimitrange-webhook-service
+        namespace: kube-system
+        path: /mutate-custom-cmss-com-v1-customlimitrange
+        port: 443
+    rules:
+      - operations: ["CREATE", "UPDATE"]
+        apiGroups: ["custom.cmss.com"]
+        apiVersions: ["v1"]
+        resources: ["customlimitranges", "customlimitranges/*"]
+    sideEffects: None
+    timeoutSeconds: 15
+    reinvocationPolicy: Never
+    failurePolicy: Fail
