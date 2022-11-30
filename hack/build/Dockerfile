@@ -1,7 +1,7 @@
 # Build the manager binary
 FROM golang:1.18.5-alpine as builder
 
-RUN apk add --no-cache gcc musl-dev libc6-compat
+RUN apk add --no-cache gcc musl-dev libc6-compat build-base libc-dev
 
 WORKDIR /workspace
 COPY go.mod go.mod
