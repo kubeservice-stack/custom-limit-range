@@ -60,4 +60,4 @@ jobs:
       - name: Test ${{ matrix.name }}
         run: |
           docker pull ${{ matrix.image}}:${{ matrix.name }}
-          docker image inspect ${{ matrix.image}}:${{ matrix.name }}
+          docker image inspect ${{ matrix.image}}
