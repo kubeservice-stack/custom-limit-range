@@ -15,7 +15,7 @@ COPY pkg/ pkg/
 COPY vendor/ vendor/
 
 # Build
-RUN GOOS=linux GOARCH=amd64 go build -ldflags "-linkmode external -extldflags -static" -o manager ./cmd/main.go
+RUN GOOS=linux GOARCH=amd64 go build -o manager ./cmd/main.go
 
 
 FROM alpine
