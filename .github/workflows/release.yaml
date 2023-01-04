@@ -55,9 +55,9 @@ jobs:
           platforms: ${{ matrix.platforms }}
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ matrix.image }}:${{steps.git-branch.outputs.git-branch}}-${{steps.git-versions.outputs.git-version}}
+            ${{ env.REGISTRY }}/${{ matrix.image }}:${{steps.git-branch.outputs.git-branch}}
             ${{ env.REGISTRY }}/${{ matrix.image }}:latest
       - name: Test ${{ matrix.name }}
         run: |
-          docker pull ${{ env.REGISTRY }}/${{ matrix.image}}:${{steps.git-branch.outputs.git-branch}}-${{steps.git-versions.outputs.git-version}}
-          docker image inspect ${{ env.REGISTRY }}/${{ matrix.image}}:${{steps.git-branch.outputs.git-branch}}-${{steps.git-versions.outputs.git-version}}
+          docker pull ${{ env.REGISTRY }}/${{ matrix.image}}:${{steps.git-branch.outputs.git-branch}}
+          docker image inspect ${{ env.REGISTRY }}/${{ matrix.image}}:${{steps.git-branch.outputs.git-branch}}
