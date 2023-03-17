@@ -2,7 +2,6 @@ apiVersion: custom.cmss.com/v1
 kind: CustomLimitRange
 metadata:
   name: test-rangelimit
-  namespace: test-a
 spec:
   limitrange:
     type: Pod
