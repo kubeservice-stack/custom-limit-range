@@ -18,58 +18,52 @@ package injector
 
 import (
 	"context"
-	"encoding/json"
-	"net/http"
+	"fmt"
 
-	"github.com/kubeservice-stack/custom-limit-range/pkg/common"
-	"github.com/kubeservice-stack/custom-limit-range/pkg/webhook"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
+	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
+
+	"github.com/kubeservice-stack/custom-limit-range/pkg/common"
+	"github.com/kubeservice-stack/custom-limit-range/pkg/webhook"
 )
 
+// log is for logging in this package.
 var customlimitrangelog = logf.Log.WithName("customlimitrange-injector")
 
 type PodAnnotator struct {
-	Client  client.Client
-	decoder *admission.Decoder
-}
-
-func NewPodAnnotatorMutate(c client.Client) admission.Handler {
-	return &PodAnnotator{Client: c}
+	Client client.Client
 }
 
 // PodAnnotator adds an annotation to every incoming pods.
-func (a *PodAnnotator) Handle(ctx context.Context, req admission.Request) admission.Response {
-	customlimitrangelog.Info("PodAnnotator", "req", req)
-	pod := &corev1.Pod{}
-
-	err := a.decoder.Decode(req, pod)
-	if err != nil {
-		return admission.Errored(http.StatusBadRequest, err)
+func (a *PodAnnotator) Default(ctx context.Context, obj runtime.Object) error {
+	customlimitrangelog.Info("PodAnnotator", "obj", obj)
+	pod, ok := obj.(*corev1.Pod)
+	if !ok {
+		return fmt.Errorf("expected a Pod but got a %T", obj)
 	}
 
 	if pod.Annotations == nil {
 		pod.Annotations = map[string]string{}
 	}
 
-	ns := req.Namespace
-	customlimitrangelog.Info("request", "pod", pod, "namespace", ns, "req.Namespace", req.Namespace)
+	ns := pod.Namespace
+	customlimitrangelog.Info("request", "pod", pod, "namespace", ns)
 
 	if ns == "" {
 		ns = "default"
 	}
 
 	if val, ok := pod.Annotations["customlimitrange.kubernetes.io/limited"]; ok && val == "disable" {
-		return admission.Allowed("Pod customlimitrange.kubernetes.io/limited setting Disable, Pass CustomLimitRange")
+		return nil
 	}
 
 	an, err := a.ConfigAnnotation(pod.Annotations, ns)
 	if err != nil {
-		return admission.Errored(http.StatusInternalServerError, err)
+		return err
 	}
 
 	pod.Annotations = an
@@ -77,20 +71,6 @@ func (a *PodAnnotator) Handle(ctx context.Context, req admission.Request) admiss
 
 	customlimitrangelog.Info("patch", "pod", pod, "namespace", ns)
 
-	marshaledPod, err := json.Marshal(pod)
-	if err != nil {
-		return admission.Errored(http.StatusInternalServerError, err)
-	}
-
-	return admission.PatchResponseFromRaw(req.Object.Raw, marshaledPod)
-}
-
-// PodAnnotator implements admission.DecoderInjector.
-// A decoder will be automatically injected.
-
-// InjectDecoder injects the decoder.
-func (a *PodAnnotator) InjectDecoder(d *admission.Decoder) error {
-	a.decoder = d
 	return nil
 }
 

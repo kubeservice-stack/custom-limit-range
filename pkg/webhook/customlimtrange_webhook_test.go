@@ -17,6 +17,7 @@ limitations under the License.
 package webhook
 
 import (
+	"context"
 	"testing"
 
 	"github.com/kubeservice-stack/custom-limit-range/pkg/common"
@@ -206,9 +207,13 @@ func TestCustomLimitRangeIsEmpty(t *testing.T) {
 	t.Parallel()
 
 	c := &CustomLimitRange{}
-	assert.Equal(c.ValidateCreate(), nil)
-	assert.Equal(c.ValidateDelete(), nil)
-	assert.Equal(c.ValidateUpdate(c), nil)
+	ctx := context.Background()
+	_, err := c.ValidateCreate(ctx, nil)
+	assert.Nil(err)
+	_, err = c.ValidateDelete(ctx, c)
+	assert.Nil(err)
+	_, err = c.ValidateUpdate(ctx, c, c)
+	assert.Nil(err)
 	d := c.DeepCopy()
 	assert.Equal(c, d)
 }
@@ -235,9 +240,15 @@ func TestCustomLimitRangeNotEmpty(t *testing.T) {
 			},
 		},
 	}
-	assert.Equal(c.ValidateCreate(), nil)
-	assert.Equal(c.ValidateDelete(), nil)
-	assert.Equal(c.ValidateUpdate(c), nil)
+
+	ctx := context.Background()
+	_, err := c.ValidateCreate(ctx, nil)
+	assert.Nil(err)
+	_, err = c.ValidateDelete(ctx, c)
+	assert.Nil(err)
+	_, err = c.ValidateUpdate(ctx, c, c)
+	assert.Nil(err)
+
 	d := c.DeepCopy()
 	assert.Equal(c, d)
 }
