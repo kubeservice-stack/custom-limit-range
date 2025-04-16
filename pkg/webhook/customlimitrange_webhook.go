@@ -37,6 +37,8 @@ var customlimitrangelog = logf.Log.WithName("customlimitrange-resource")
 func (r *CustomLimitRange) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(r).
+		WithValidator(&CustomLimitRange{}).
+		WithDefaulter(&CustomLimitRange{}).
 		Complete()
 }
 

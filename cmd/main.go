@@ -99,11 +99,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&customv1.CustomLimitRange{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "CustomLimitRange")
-		os.Exit(1)
-	}
-
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
 		setupLog.Error(err, "unable to set up health check")
 		os.Exit(1)
@@ -113,8 +108,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err = (&customv1.CustomLimitRange{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "CustomLimitRange")
+		os.Exit(1)
+	}
+
 	if err := builder.WebhookManagedBy(mgr).
 		For(&corev1.Pod{}).
+		WithCustomPath("/mutate").
 		WithDefaulter(&injector.PodAnnotator{Client: mgr.GetClient()}).
 		Complete(); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "Pod")
