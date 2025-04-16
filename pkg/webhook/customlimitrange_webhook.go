@@ -17,7 +17,8 @@ limitations under the License.
 package webhook
 
 import (
-	"github.com/kubeservice-stack/custom-limit-range/pkg/common"
+	"context"
+
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -25,6 +26,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	wk "sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
+
+	"github.com/kubeservice-stack/custom-limit-range/pkg/common"
 )
 
 // log is for logging in this package.
@@ -33,23 +37,26 @@ var customlimitrangelog = logf.Log.WithName("customlimitrange-resource")
 func (r *CustomLimitRange) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(r).
+		WithValidator(&CustomLimitRange{}).
+		WithDefaulter(&CustomLimitRange{}).
 		Complete()
 }
 
-var _ wk.Defaulter = &CustomLimitRange{}
+var _ wk.CustomDefaulter = &CustomLimitRange{}
 
 // Default implements webhook.Defaulter so a webhook will be registered for the type
-func (r *CustomLimitRange) Default() {
+func (r *CustomLimitRange) Default(ctx context.Context, obj runtime.Object) error {
 	customlimitrangelog.Info("default", "name", r.Name, "request", r)
 	customlimitrangelog.Info("Spec", "spec", r.Spec)
+	return nil
 }
 
-var _ wk.Validator = &CustomLimitRange{}
+var _ wk.CustomValidator = &CustomLimitRange{}
 var minRsrc = resource.MustParse("1k")
 var maxRsrc = resource.MustParse("1P")
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (r *CustomLimitRange) ValidateCreate() error {
+func (r *CustomLimitRange) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
 	customlimitrangelog.Info("validate create", "name", r.Name, "request", r)
 	var allErrs field.ErrorList
 	err := bandwidthValidateIsReasonable(r.Spec.LRange.Min, r.Spec.LRange.Default, r.Spec.LRange.Max)
@@ -60,14 +67,14 @@ func (r *CustomLimitRange) ValidateCreate() error {
 	}
 	customlimitrangelog.Info("validate bandwidthValidateIsReasonable", "err", err, "field.ErrorList", allErrs)
 	if len(allErrs) == 0 {
-		return nil
+		return nil, nil
 	}
 
-	return errors.NewInvalid(r.GroupVersionKind().GroupKind(), r.Name, allErrs)
+	return nil, errors.NewInvalid(r.GroupVersionKind().GroupKind(), r.Name, allErrs)
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (r *CustomLimitRange) ValidateUpdate(old runtime.Object) error {
+func (r *CustomLimitRange) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	customlimitrangelog.Info("validate update", "name", r.Name, "request", r)
 	var allErrs field.ErrorList
 	err := bandwidthValidateIsReasonable(r.Spec.LRange.Min, r.Spec.LRange.Default, r.Spec.LRange.Max)
@@ -78,16 +85,16 @@ func (r *CustomLimitRange) ValidateUpdate(old runtime.Object) error {
 	}
 	customlimitrangelog.Info("validate bandwidthValidateIsReasonable", "err", err, "field.ErrorList", allErrs)
 	if len(allErrs) == 0 {
-		return nil
+		return nil, nil
 	}
 
-	return errors.NewInvalid(r.GroupVersionKind().GroupKind(), r.Name, allErrs)
+	return nil, errors.NewInvalid(r.GroupVersionKind().GroupKind(), r.Name, allErrs)
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (r *CustomLimitRange) ValidateDelete() error {
+func (r *CustomLimitRange) ValidateDelete(cxt context.Context, obj runtime.Object) (admission.Warnings, error) {
 	customlimitrangelog.Info("validate delete", "name", r.Name)
-	return nil
+	return nil, nil
 }
 
 func bandwidthValidateIsReasonable(min, def, max CustomItems) error {
