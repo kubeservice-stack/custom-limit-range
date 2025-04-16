@@ -77,6 +77,7 @@ func main() {
 		WebhookServer: webhook.NewServer(
 			webhook.Options{
 				CertDir: certsDir,
+				Port:    9443,
 			}),
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
