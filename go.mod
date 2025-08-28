@@ -7,7 +7,7 @@ toolchain go1.24.1
 require (
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/sirupsen/logrus v1.9.3
-	github.com/stretchr/testify v1.11.0
+	github.com/stretchr/testify v1.11.1
 	k8s.io/api v0.33.3
 	k8s.io/apimachinery v0.33.3
 	k8s.io/client-go v0.33.3
