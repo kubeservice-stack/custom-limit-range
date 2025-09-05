@@ -36,7 +36,7 @@ jobs:
         run: |
           echo "git-branch=$(echo ${GITHUB_REF##*/} | tr '[A-Z]' '[a-z]')" >> "$GITHUB_OUTPUT"
       - name: install Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
       -
