@@ -1,5 +1,5 @@
 # Build the manager binary
-FROM golang:1.25.5-alpine AS builder
+FROM golang:1.25.6-alpine AS builder
 
 RUN apk add --no-cache gcc musl-dev libc6-compat build-base libc-dev
 
