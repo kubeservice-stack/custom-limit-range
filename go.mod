@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/jessevdk/go-flags v1.6.1
-	github.com/sirupsen/logrus v1.9.4
+	github.com/sirupsen/logrus v1.10.0
 	github.com/stretchr/testify v1.11.1
 	k8s.io/api v0.35.4
 	k8s.io/apimachinery v0.35.4
